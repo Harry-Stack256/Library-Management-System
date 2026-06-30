@@ -103,6 +103,17 @@ public class Library {
 			break;
 			case "4":
 			System.out.println("Delete Book");
+			ID = ID(scanner);
+			
+			if(ID!=null) {
+				book = new Book();
+				book.setID(ID);
+				
+				DAO = new BookDAO(book,URL);
+			     DAO.delete(ID);
+			     
+				}
+			
 			break;
 			 case "5":
 				 scanner.close();

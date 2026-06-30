@@ -169,8 +169,24 @@ private   Connection getConnection() throws Exception {
 	}
 
 	
-	public void delete(int id) {
+	public void delete(int id) throws Exception {
 		// TODO Auto-generated method stub
+		String sql = "DELETE FROM books WHERE id = ?";
+		Connection conn = getConnection();
+		 
+		 PreparedStatement pstmt = conn.prepareStatement(sql);
+		 pstmt.setInt(1, id);
+		 
+		 
+		 System.out.println("Row deleted");
+		 read(id);
+		 
+		 int rs = pstmt.executeUpdate();
+		 
+		 
+		 
+		 
+		
 		
 	}
 
