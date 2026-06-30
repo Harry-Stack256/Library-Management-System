@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS books (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    isAvailable INTEGER NOT NULL,
+    isbn TEXT NOT NULL
+);
+
+
+
+	
+
+
