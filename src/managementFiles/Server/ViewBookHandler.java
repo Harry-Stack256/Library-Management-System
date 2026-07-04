@@ -8,40 +8,67 @@ import managementFiles.Database.BookDAO;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpExchange;
+import java.io.IOException;
+import java.io.OutputStream;
+import managementFiles.Database.BookDAO;
+
 public class ViewBookHandler implements HttpHandler {
-	String  bookData;
+    
+    // Core database URL node anchor
+    private static final String URL = "jdbc:sqlite:LIBRARY_DB.db";
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        // 1. BRIDGE: Catch the incoming request and look at the query (e.g., /viewBook?id=1)
-        String query = exchange.getRequestURI().getQuery(); 
-        //gets the url and gets the query from the get request 
+        // Set CORS headers so your upcoming React frontend can talk to this endpoint safely
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
         
-        // 2. VALIDATE: Parse out the ID and check if it's valid
-        int id = Integer.parseInt(query.split("=")[1]); 
-        
-        //so it spilts the query find index 1 
+        String responseText;
+        int statusCode = 200;
 
-        // 3. HANDOFF: Call your exact CRUD app logic!
-        Book book = new Book();
-        final String URL = "jdbc:sqlite:LIBRARY_DB.db";
-        BookDAO dao = new BookDAO(book, URL);
-        
-        // (Note: You'd modify your read method to return a String instead of just System.out.println)
-       String bookData = dao.read(id); 
-       System.out.println(bookData);
-       
+        try {
+            // 1. BRIDGE: Extract the incoming URL query string
+            String query = exchange.getRequestURI().getQuery(); 
+            
+            // 2. VALIDATE: Explicit null guard and regex format check
+            if (query == null || !query.contains("=")) {
+                statusCode = 400;
+                responseText = "{\"error\": \"Missing query parameters. Format should be ?id=VALUE\"}";
+            } else {
+                String[] queryParts = query.split("=");
+                if (queryParts.length < 2) {
+                    statusCode = 400;
+                    responseText = "{\"error\": \"Malformed query parameter. Missing value after '='\"}";
+                } else {
+                    String idValue = queryParts[1].trim();
+                    
+                    // Hand off to parsing logic
+                    int id = Integer.parseInt(idValue); 
+                    
+                    // 3. HANDOFF: Single clean DAO instantiation (No stateful local models passed inside)
+                    BookDAO dao = new BookDAO(URL);
+                    
+                    // Pull the unified JSON graph payload directly out of the database data stream
+                    responseText = dao.readByID(id);
+                }
+            }
+        } catch (NumberFormatException e) {
+            statusCode = 400;
+            responseText = "{\"error\": \"ID parameter must be a structural integer string.\"}";
+        } catch (Exception e) {
+            statusCode = 500;
+            responseText = "{\"error\": \"Internal server network error: " + e.getMessage() + "\"}";
+        }
 
-        // 4. RESPONSE: Send the database results back to the browser
-        exchange.sendResponseHeaders(200, bookData.length());
-        OutputStream os = exchange.getResponseBody();
-        os.write(bookData.getBytes());
-        os.close();
+        // 4. RESPONSE: Stream the payload back to the network pipeline
+        byte[] responseBytes = responseText.getBytes("UTF-8");
+        exchange.sendResponseHeaders(statusCode, responseBytes.length);
+        
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(responseBytes);
+            os.flush();
+        }
     }
-	public String getBookData() {
-		return bookData;
-	}
-	public void setBookData(String bookData) {
-		this.bookData = bookData;
-	}
-    
 }
