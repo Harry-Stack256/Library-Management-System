@@ -1,4 +1,4 @@
-package managementFiles;
+package managementFiles.Database;
 
 public class Book {
 	private int ID;

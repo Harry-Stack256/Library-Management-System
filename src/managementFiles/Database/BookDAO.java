@@ -1,4 +1,4 @@
-package managementFiles;
+package managementFiles.Database;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -74,7 +74,7 @@ private   Connection getConnection() throws Exception {
 	
 
 	//This will have Integer agurments later 
-	public void read(int id) {
+	public String read(int id) {
 		
 		try {
 			
@@ -96,24 +96,29 @@ private   Connection getConnection() throws Exception {
 			 String isbn = rs.getString("isbn");
 			 
 			 String bool;
+			 boolean bookAvailable;
 			 if(isAvailable==1) {
 				 
 				 bool="True";
+				 bookAvailable=true;
 			 }else {
 				 
 				 bool="False";
+				 bookAvailable=false;
 			 }
 			 
 			 
 			 System.out.printf("   %d | %d  |   %s  |    %s   |   %s \n",rowNum,ID,title,bool,isbn);
-			 
+			 Book book = new Book(title,bookAvailable,isbn);
+			return book.toString(); 
 			 
 			 
 		 }
 		 
+		 
 		 if(!anyBooks) {
 			 System.out.println("There where no Books with that ID");
-			 return;
+			 return  "No book with that ID";
 		 }
 		 
 		 
@@ -123,10 +128,11 @@ private   Connection getConnection() throws Exception {
 		}catch(Exception e) {
 			 
 			 System.out.println("Exception");
+			 return "Book";
 			 
 		 }
 		 
-		 
+		 return "Book";
 		// TODO Auto-generated method stub
 		
 	}
