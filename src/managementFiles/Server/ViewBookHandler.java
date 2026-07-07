@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import managementFiles.Database.BookDAO;
 
+
+
 public class ViewBookHandler implements HttpHandler {
     
     // Core database URL node anchor
@@ -42,16 +44,36 @@ public class ViewBookHandler implements HttpHandler {
                     statusCode = 400;
                     responseText = "{\"error\": \"Malformed query parameter. Missing value after '='\"}";
                 } else {
-                    String idValue = queryParts[1].trim();
-                    
-                    // Hand off to parsing logic
-                    int id = Integer.parseInt(idValue); 
-                    
-                    // 3. HANDOFF: Single clean DAO instantiation (No stateful local models passed inside)
+                    String Value = queryParts[1].trim();
+                   
                     BookDAO dao = new BookDAO(URL);
                     
                     // Pull the unified JSON graph payload directly out of the database data stream
-                    responseText = dao.readByID(id);
+                    responseText = dao.readByName(Value);
+                    
+                    if(responseText==null) {
+                    	
+                    	
+                    	if(isNumber(Value)) {
+                    	 // Hand off to parsing logic
+                        int id = Integer.parseInt(Value); 
+                        responseText= dao.readByID(id);
+                        if(responseText==null) {
+                        	responseText= "{\"error\" :\" Book or Book ID was not found.\"}";
+                        	statusCode=400;
+                        }
+                        
+                    	}
+                    	
+                    }
+                    
+                    // 3. HANDOFF: Single clean DAO instantiation (No stateful local models passed inside)
+                  
+                    	
+                    	
+                    	
+                    	
+                    
                 }
             }
         } catch (NumberFormatException e) {
@@ -64,6 +86,12 @@ public class ViewBookHandler implements HttpHandler {
 
         // 4. RESPONSE: Stream the payload back to the network pipeline
         byte[] responseBytes = responseText.getBytes("UTF-8");
+        
+        for(int x =0; x<responseBytes.length;x++) {
+        	
+        	System.out.println(responseBytes[x]);
+        	
+        }
         exchange.sendResponseHeaders(statusCode, responseBytes.length);
         
         try (OutputStream os = exchange.getResponseBody()) {
@@ -71,4 +99,19 @@ public class ViewBookHandler implements HttpHandler {
             os.flush();
         }
     }
-}
+    public static boolean isNumber(String number) {
+        String numberCleaned = number.trim();
+        if (numberCleaned.isBlank()) {
+            return false;
+        }
+        for (int x = 0; x < numberCleaned.length(); x++) {
+            char asc = numberCleaned.charAt(x);
+            if (asc < 48 || asc > 57) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    
+}	

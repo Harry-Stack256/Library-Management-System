@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,7 +82,7 @@ public class BookDAO {
     public String readByID(int id) {
         try (Connection conn = getConnection()) {
             Book book = fetchBookGraph(conn, "SELECT * FROM books WHERE id = ?", String.valueOf(id));
-            if (book == null) return "{\"error\": \"No book with that ID found\"}";
+            if (book == null) return null;
             return convertBookToJSON(book);
         } catch (Exception e) {
             return "{\"error\": \"Database error: " + e.getMessage() + "\"}";
@@ -95,7 +96,7 @@ public class BookDAO {
         try (Connection conn = getConnection()) {
             // Using LIKE allows for flexible pattern matching
             Book book = fetchBookGraph(conn, "SELECT * FROM books WHERE title LIKE ?", "%" + name + "%");
-            if (book == null) return "{\"error\": \"No book with that Title found\"}";
+            if (book == null) return null;
             return convertBookToJSON(book);
         } catch (Exception e) {
             return "{\"error\": \"Database error: " + e.getMessage() + "\"}";
@@ -105,7 +106,7 @@ public class BookDAO {
     // ==========================================
     // 3. UPDATE (Updating availability status of a physical item)
     // ==========================================
-    public void updateCopyAvailability(String barcode, boolean isAvailable) throws Exception {
+    public boolean updateCopyAvailability(String barcode, boolean isAvailable) throws Exception {
         String sql = "UPDATE book_copies SET isAvailable = ? WHERE barcode = ?";
         try (Connection conn = getConnection(); 
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -113,7 +114,21 @@ public class BookDAO {
             pstmt.setInt(1, isAvailable ? 1 : 0);
             pstmt.setString(2, barcode);
             int rows = pstmt.executeUpdate();
+            
+            if(rows==0) {return false;}
+            else {
+           
             System.out.println("Copy availability updated. Rows affected: " + rows);
+         // Add this right under your println("Rows affected: " + rows);
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT isAvailable FROM book_copies WHERE barcode = '" + barcode + "'")) {
+                if (rs.next()) {
+                    System.out.println("VERIFICATION: The database file Java is touching actually holds: " + rs.getInt("isAvailable"));
+                }
+            }
+            return true;
+            
+            }
         }
     }
 

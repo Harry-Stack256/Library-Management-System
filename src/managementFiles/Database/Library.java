@@ -150,7 +150,7 @@ public class Library {
         }
     }
 
-    private static boolean isNumber(String number) {
+    public static boolean isNumber(String number) {
         String numberCleaned = number.trim();
         if (numberCleaned.isBlank()) {
             return false;

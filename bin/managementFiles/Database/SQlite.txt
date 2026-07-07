@@ -6,7 +6,41 @@ CREATE TABLE IF NOT EXISTS books (
 );
 
 
-
+{
+    "id": 3,
+    "title": "1984",
+    "isbn": "9780451524935",
+    "authors": [
+        "George Orwell"
+    ],
+    "copies": [
+        {
+            "copy_id": 11,
+            "barcode": "BC-003-A",
+            "isAvailable": false
+        },
+        {
+            "copy_id": 12,
+            "barcode": "BC-003-B",
+            "isAvailable": false
+        },
+        {
+            "copy_id": 13,
+            "barcode": "BC-003-C",
+            "isAvailable": true
+        },
+        {
+            "copy_id": 14,
+            "barcode": "BC-003-D",
+            "isAvailable": true
+        },
+        {
+            "copy_id": 15,
+            "barcode": "BC-003-E",
+            "isAvailable": true
+        }
+    ]
+}
 	
 
 
