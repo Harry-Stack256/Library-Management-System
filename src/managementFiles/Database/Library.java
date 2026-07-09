@@ -2,6 +2,8 @@ package managementFiles.Database;
 
 
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import managementFiles.Database.BookDAO;
 
@@ -110,6 +112,7 @@ public class Library {
                     break;
                     
                 case "5":
+                
                     scanner.close();
                     running = false;
                     System.out.println("System shutting down gracefully.");
@@ -174,4 +177,6 @@ public class Library {
             System.out.println("Input cannot be left empty.");
         }
     }
+    
+  
 }

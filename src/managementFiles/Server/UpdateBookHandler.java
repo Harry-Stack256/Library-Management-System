@@ -72,10 +72,15 @@ public class UpdateBookHandler implements HttpHandler {
             // 3. HANDOFF: Update the database records
             BookDAO dao = new BookDAO(URL);
             boolean available=true;
-            boolean didUpdate =true;
+            boolean didUpdate =false;
+            
+            System.out.println(dao.readByID(ID));
            
             if(dao.readByID(ID)!=null) {
             	String updatedBook = dao.readByID(ID);
+            	
+            	
+            	 System.out.println(dao.readByID(ID));
             	
             	String barcode= getJsonField(updatedBook,"barcode");
             	String isAvailable=  getJsonField(rawJson.toString(),"isAvailable");
@@ -88,7 +93,7 @@ public class UpdateBookHandler implements HttpHandler {
             		
             	}
             		
-            	
+            	 System.out.println(dao.readByID(ID));
             	
             	
          didUpdate=   dao.updateCopyAvailability(barcode,available);
@@ -96,6 +101,7 @@ public class UpdateBookHandler implements HttpHandler {
             }
           if(didUpdate) {
             responseText = "{\"message\": \"Book blueprint updated successfully!\"}";
+            System.out.println(dao.readByID(ID));
             statusCode=200;
             }else {
             	

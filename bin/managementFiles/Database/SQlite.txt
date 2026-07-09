@@ -1,9 +1,19 @@
+This file is to keep track of my schemas 
+
+
+
 CREATE TABLE IF NOT EXISTS books (
     ID INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     isAvailable INTEGER NOT NULL,
     isbn TEXT NOT NULL
 );
+
+
+{   "book_id":3,
+    "barcode": "BC-003-C",
+    "isAvailable": false
+}
 
 
 {

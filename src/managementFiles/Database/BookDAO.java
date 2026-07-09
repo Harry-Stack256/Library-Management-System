@@ -110,8 +110,16 @@ public class BookDAO {
         String sql = "UPDATE book_copies SET isAvailable = ? WHERE barcode = ?";
         try (Connection conn = getConnection(); 
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        	
+        	int  ava= 0;
+        	if(isAvailable) {
+        		ava =1;
+        	}else {
+        		
+        		ava= 0;
+        	}
              
-            pstmt.setInt(1, isAvailable ? 1 : 0);
+            pstmt.setInt(1, ava);
             pstmt.setString(2, barcode);
             int rows = pstmt.executeUpdate();
             
@@ -135,7 +143,7 @@ public class BookDAO {
     // ==========================================
     // 4. DELETE (Relies on Cascade Delete configuration)
     // ==========================================
-    public void delete(int id) throws Exception {
+    public boolean delete(int id) throws Exception {
         String sql = "DELETE FROM books WHERE id = ?";
         try (Connection conn = getConnection(); 
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -143,7 +151,14 @@ public class BookDAO {
             pstmt.setInt(1, id);
             int rows = pstmt.executeUpdate();
             System.out.println("Book record deleted from database. Rows wiped: " + rows);
+            
+            if(rows<=0) {
+            	
+            	return false;
+            }
         }
+        
+        return true;
     }
 
     // ========================================================================
@@ -184,6 +199,10 @@ public class BookDAO {
                 pstmtCopy.setInt(1, book.getId());
                 try (ResultSet rsCopy = pstmtCopy.executeQuery()) {
                     while (rsCopy.next()) {
+                    	
+                    	
+                    	
+                    	
                         book.addCopy(new BookCopy(rsCopy.getInt("copy_id"), rsCopy.getInt("book_id"), rsCopy.getString("barcode"), rsCopy.getInt("isAvailable") == 1));
                     }
                 }

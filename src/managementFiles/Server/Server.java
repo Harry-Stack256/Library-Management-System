@@ -11,7 +11,7 @@ public class Server {
     public static void main(String[] args) {
         try {
             // 1. Open port 8080 on your local machine
-            HttpServer server = HttpServer.create(new InetSocketAddress(8084), 0);
+            HttpServer server = HttpServer.create(new InetSocketAddress(8085), 0);
             System.out.println("Backend server is live on http://localhost:8080");
 
             // 2. Tie your handler to a specific URL path
@@ -19,6 +19,7 @@ public class Server {
             server.createContext("/viewBook", new ViewBookHandler());
             
             server.createContext("/updateBook", new UpdateBookHandler());
+            server.createContext("/deleteBook", new DeleteBookHandler());
 
             // 3. Start the execution loop
             server.setExecutor(null); // Use the default system executor
