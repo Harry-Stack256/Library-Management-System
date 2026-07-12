@@ -66,7 +66,7 @@ public class UpdateBookHandler implements HttpHandler {
            int ID=-1;
            if(isNumber(maybeID)) {
             ID = Integer.parseInt(getJsonField(rawJson.toString(),"book_id"));
-            
+            System.out.println("This is the ID "+ID);        
            }
 
             // 3. HANDOFF: Update the database records
@@ -82,9 +82,11 @@ public class UpdateBookHandler implements HttpHandler {
             	
             	 System.out.println(dao.readByID(ID));
             	
-            	String barcode= getJsonField(updatedBook,"barcode");
+            	String barcode= getJsonField(rawJson.toString(),"barcode");
             	String isAvailable=  getJsonField(rawJson.toString(),"isAvailable");
+            	System.out.println("Barcode"+barcode);         	
             	System.out.println(isAvailable);
+            	System.out.println("The availablity "+isAvailable);
             	if(isAvailable.equalsIgnoreCase("true")) {
             		
             		available = true;

@@ -45,27 +45,37 @@ public class ViewBookHandler implements HttpHandler {
                     responseText = "{\"error\": \"Malformed query parameter. Missing value after '='\"}";
                 } else {
                     String Value = queryParts[1].trim();
+                    
+                    System.out.println(Value);
                    
                     BookDAO dao = new BookDAO(URL);
                     
                     // Pull the unified JSON graph payload directly out of the database data stream
-                    responseText = dao.readByName(Value);
-                    
-                    if(responseText==null) {
+                   
+                    if(isNumber(Value)) {
+                   	 // Hand off to parsing logic
+                    	try {
                     	
-                    	
-                    	if(isNumber(Value)) {
-                    	 // Hand off to parsing logic
-                        int id = Integer.parseInt(Value); 
-                        responseText= dao.readByID(id);
-                        if(responseText==null) {
-                        	responseText= "{\"error\" :\" Book or Book ID was not found.\"}";
-                        	statusCode=400;
-                        }
-                        
+                       int id = Integer.parseInt(Value); 
+                       
+                      
+                       System.out.println(id);
+                       responseText= dao.readByID(id);
+                       
+                       System.out.println(responseText); 
+                    	}catch(NumberFormatException e ) {
+                    		
+                    		responseText = "{\"error \":\"Out of range of int type int \"}";
                     	}
-                    	
+                       
+                      
+                       
+                   	} else{
+                    	responseText= "{\"error\" :\" Book or Book ID was not found.\"}";
+                    	statusCode=400;
                     }
+                    	
+                    
                     
                     // 3. HANDOFF: Single clean DAO instantiation (No stateful local models passed inside)
                   
@@ -99,6 +109,7 @@ public class ViewBookHandler implements HttpHandler {
             os.flush();
         }
     }
+   
     public static boolean isNumber(String number) {
         String numberCleaned = number.trim();
         if (numberCleaned.isBlank()) {
