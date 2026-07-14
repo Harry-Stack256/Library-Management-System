@@ -61,6 +61,10 @@ public class ViewBookHandler implements HttpHandler {
                       
                        System.out.println(id);
                        responseText= dao.readByID(id);
+                       if(responseText==null) {
+                    	   statusCode=400;
+                    	   responseText= "{\"error\" :\" Book or Book ID was not found.\"}";
+                       }
                        
                        System.out.println(responseText); 
                     	}catch(NumberFormatException e ) {

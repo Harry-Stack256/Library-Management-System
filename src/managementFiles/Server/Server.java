@@ -20,6 +20,8 @@ public class Server {
             
             server.createContext("/updateBook", new UpdateBookHandler());
             server.createContext("/deleteBook", new DeleteBookHandler());
+            
+            server.createContext("/createBook",new CreateBookHandler());
 
             // 3. Start the execution loop
             server.setExecutor(null); // Use the default system executor

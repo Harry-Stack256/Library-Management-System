@@ -2,6 +2,7 @@ package managementFiles.Database;
 
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,15 +20,90 @@ public class BookDAO {
         return connection.getConnection(); 
     }
     
+    
     // Cleaned up the constructor: DAOs only need the DB path, not a stateful Book field!
     public BookDAO(String url) {
         this.URL = url;
+    }
+    
+    public boolean createBookComplete(String title, String isbn, List<String> authors, int copyCount) throws SQLException {
+        String insertBookSql = "INSERT INTO books (title, isbn) VALUES (?, ?)";
+        String insertCopySql = "INSERT INTO book_copies (book_id, barcode, isAvailable) VALUES (?, ?, ?)";
+        String insertAuthorSql = "INSERT INTO book_authors (book_id, author_name) VALUES (?, ?)";
+        
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(URL);
+            conn.setAutoCommit(false); 
+            
+            int newBookId = -1;
+            try (PreparedStatement bookStmt = conn.prepareStatement(insertBookSql, Statement.RETURN_GENERATED_KEYS)) {
+                bookStmt.setString(1, title);
+                bookStmt.setString(2, isbn);
+                int affectedRows = bookStmt.executeUpdate();
+                
+                if (affectedRows == 0) {
+                    conn.rollback();
+                    return false;
+                }
+                
+                try (ResultSet generatedKeys = bookStmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        newBookId = generatedKeys.getInt(1);
+                    }
+                }
+            }
+            
+            if (newBookId == -1) {
+                conn.rollback();
+                return false;
+            }
+
+            try (PreparedStatement authorStmt = conn.prepareStatement(insertAuthorSql)) {
+                for (String authorName : authors) {
+                    authorStmt.setInt(1, newBookId);
+                    authorStmt.setString(2, authorName);
+                    authorStmt.addBatch();
+                }
+                authorStmt.executeBatch();
+            }
+
+            try (PreparedStatement copyStmt = conn.prepareStatement(insertCopySql)) {
+                char barcodeSuffix = 'A';
+                for (int i = 0; i < copyCount; i++) {
+                    String barcode = String.format("BC-%03d-%c", newBookId, barcodeSuffix);
+                    
+                    copyStmt.setInt(1, newBookId);
+                    copyStmt.setString(2, barcode);
+                    copyStmt.setBoolean(3, true);
+                    copyStmt.addBatch();
+                    
+                    barcodeSuffix++;
+                }
+                copyStmt.executeBatch();
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                conn.rollback(); // Rollback still happens here to protect DB state!
+            }
+            throw e; // Pass the buck up to the controller layer
+        } finally {
+            if (conn != null) {
+                conn.close();
+            }
+        }
     }
 
     // ==========================================
     // 1. CREATE (Inserting into 3 Tables)
     // ==========================================
-    public void add(Book book) throws Exception {
+    public boolean add(Book book) throws Exception {
+    	
+    	boolean created=false;
         String insertBookSql = "INSERT INTO books (title, isbn) VALUES (?, ?)";
         String insertAuthorSql = "INSERT INTO book_authors (book_id, author_name) VALUES (?, ?)";
         String insertCopySql = "INSERT INTO book_copies (book_id, barcode, isAvailable) VALUES (?, ?, ?)";
@@ -68,10 +144,18 @@ public class BookDAO {
                     }
                 }
                 conn.commit(); // Save all changes together
+                
                 System.out.println("Book and all its relational graph leaves inserted successfully!");
+                
+                created =true;
+                return created;
             } catch (Exception e) {
-                conn.rollback(); // Undo everything if a single point fails
-                throw e;
+            	conn.rollback();
+            	return created;
+                 // Undo everything if a single point fails
+               /// throw e;
+                
+                
             }
         }
     }

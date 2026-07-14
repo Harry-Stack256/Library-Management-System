@@ -10,7 +10,8 @@ public class Book {
     private String isbn;
     
     // Here are your graph edges connecting the child subsets!
-    private List<BookAuthor> authors = new ArrayList<>();
+    private List<String> authorsString = new ArrayList<>();
+    private List<BookAuthor>authors= new ArrayList<>();
     private List<BookCopy> copies = new ArrayList<>();
 
     // Constructors
@@ -33,10 +34,19 @@ public class Book {
     public void setIsbn(String isbn) { this.isbn = isbn; }
 
     public List<BookAuthor> getAuthors() { return authors; }
-    public void setAuthors(List<BookAuthor> authors) { this.authors = authors; }
+    public void setAuthors(List<String> authorsList) { this.authorsString = authorsList; }
 
-    public List<BookCopy> getCopies() { return copies; }
+    public List<String> getAuthorsString() {
+		return authorsString;
+	}
+
+	public void setAuthorsString(List<String> authorsString) {
+		this.authorsString = authorsString;
+	}
+
+	public List<BookCopy> getCopies() { return copies; }
     public void setCopies(List<BookCopy> copies) { this.copies = copies; }
+    
     
     // Convenience methods to add items to the lists
     public void addAuthor(BookAuthor author) { this.authors.add(author); }
